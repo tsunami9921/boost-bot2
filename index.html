@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Roblox Profil Arama</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .hidden { display: none; }
+  </style>
 </head>
 <body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-6">
   <h1 class="text-3xl font-bold mb-6">Roblox Profil Arama</h1>
@@ -13,8 +16,67 @@
     <button onclick="searchUser()" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Ara</button>
   </div>
 
-  <div id="result" class="text-center"></div>
+  <div id="result" class="text-center hidden">
+    <div class="bg-gray-800 p-6 rounded shadow-lg">
+      <img id="avatar" class="mx-auto w-32 h-32 rounded-full mb-4" />
+      <h2 id="displayName" class="text-xl font-bold"></h2>
+      <p id="usernameShow" class="text-gray-300"></p>
+      <p id="userId" class="text-sm"></p>
+      <a id="profileLink" target="_blank" class="text-blue-400 underline block mt-2">Profili Aç</a>
+    </div>
+  </div>
 
-  <script src="search.js"></script>
+  <p id="errorMsg" class="text-red-500 mt-4 hidden"></p>
+
+  <script>
+    async function searchUser() {
+      const input = document.getElementById("username").value.trim();
+      const result = document.getElementById("result");
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (!input) {
+        errorMsg.textContent = "⚠️ Kullanıcı adı boş olamaz.";
+        errorMsg.classList.remove("hidden");
+        result.classList.add("hidden");
+        return;
+      }
+
+      errorMsg.classList.add("hidden");
+      result.classList.add("hidden");
+
+      try {
+        const res = await fetch("https://users.roblox.com/v1/usernames/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usernames: [input] })
+        });
+
+        const data = await res.json();
+        const user = data.data[0];
+
+        if (!user) {
+          errorMsg.textContent = "🚫 Kullanıcı bulunamadı.";
+          errorMsg.classList.remove("hidden");
+          return;
+        }
+
+        const avatarRes = await fetch(`https://thumbnails.roblox.com/v1/users/avatar?userIds=${user.id}&size=420x420&format=Png&isCircular=true`);
+        const avatarData = await avatarRes.json();
+        const avatar = avatarData.data[0].imageUrl;
+
+        document.getElementById("avatar").src = avatar;
+        document.getElementById("displayName").textContent = user.displayName;
+        document.getElementById("usernameShow").textContent = `@${user.username}`;
+        document.getElementById("userId").textContent = `ID: ${user.id}`;
+        document.getElementById("profileLink").href = `https://www.roblox.com/users/${user.id}/profile`;
+
+        result.classList.remove("hidden");
+
+      } catch (err) {
+        errorMsg.textContent = "🚫 Hata oluştu veya CORS engeli var.";
+        errorMsg.classList.remove("hidden");
+      }
+    }
+  </script>
 </body>
 </html>
