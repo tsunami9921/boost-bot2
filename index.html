@@ -1,77 +1,122 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Roblox Profil Arama</title>
+  <meta charset="UTF-8" />
+  <title>Fake PC - Masaüstü</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>.hidden{display:none;}</style>
-</head>
-<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-6">
-  <h1 class="text-3xl font-bold mb-6">Roblox Profil Arama</h1>
-
-  <div class="flex gap-2 mb-6">
-    <input id="username" type="text" placeholder="Kullanıcı adı" class="p-2 rounded text-black w-64"/>
-    <button onclick="searchUser()" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Ara</button>
-  </div>
-
-  <div id="result" class="text-center hidden">
-    <div class="bg-gray-800 p-6 rounded shadow-lg">
-      <img id="avatar" class="mx-auto w-32 h-32 rounded-full mb-4"/>
-      <h2 id="displayName" class="text-xl font-bold"></h2>
-      <p id="usernameShow" class="text-gray-300"></p>
-      <p id="userId" class="text-sm"></p>
-      <a id="profileLink" target="_blank" class="text-blue-400 underline block mt-2">Profili Aç</a>
-    </div>
-  </div>
-
-  <p id="errorMsg" class="text-red-500 mt-4 hidden"></p>
-
-  <script>
-    async function searchUser(){
-      const name = document.getElementById("username").value.trim();
-      const resEl = document.getElementById("result");
-      const errEl = document.getElementById("errorMsg");
-
-      if(!name){
-        errEl.textContent = "⚠️ Kullanıcı adı boş.";
-        errEl.classList.remove("hidden");
-        resEl.classList.add("hidden");
-        return;
-      }
-
-      errEl.classList.add("hidden");
-      resEl.classList.add("hidden");
-
-      errEl.textContent = "⏳ Yükleniyor...";
-      errEl.classList.remove("hidden");
-
-      try {
-        const api = "https://users.roblox.com/v1/usernames/users";
-        const proxy = "https://cors-anywhere.herokuapp.com/";
-        const body = JSON.stringify({usernames:[name]});
-
-        const r1 = await fetch(proxy + api, { method:"POST", headers:{"Content-Type":"application/json"}, body });
-        const j1 = await r1.json();
-        const user = j1.data?.[0];
-        if(!user) throw new Error("Kullanıcı yok.");
-
-        const thumbApi = `https://thumbnails.roblox.com/v1/users/avatar?userIds=${user.id}&size=420x420&format=Png&isCircular=true`;
-        const r2 = await fetch(proxy + thumbApi);
-        const img = (await r2.json()).data?.[0]?.imageUrl;
-
-        document.getElementById("avatar").src = img;
-        document.getElementById("displayName").textContent = user.displayName;
-        document.getElementById("usernameShow").textContent = "@"+user.username;
-        document.getElementById("userId").textContent = "ID: "+user.id;
-        document.getElementById("profileLink").href = `https://www.roblox.com/users/${user.id}/profile`;
-
-        errEl.classList.add("hidden");
-        resEl.classList.remove("hidden");
-      } catch(err){
-        errEl.textContent = "🚫 " + err.message;
-        resEl.classList.add("hidden");
-      }
+  <style>
+    body {
+      background: url('https://wallpapercave.com/wp/wp2757874.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: sans-serif;
+      overflow: hidden;
     }
-  </script>
-</body>
+    .icon:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    .window {
+      width: 600px;
+      height: 400px;
+      background-color: #1f2937;
+      border: 2px solid #4b5563;
+      position: absolute;
+      top: 100px;
+      left: 100px;
+      display: none;
+      flex-direction: column;
+    }
+    .window-header {
+      background-color: #374151;
+      color: white;
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+    }
+    .taskbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      color: white;
+    }
+    .start-menu {
+      position: absolute;
+      bottom: 40px;
+      left: 10px;
+      background-color: #1f2937;
+      width: 200px;
+      display: none;
+      flex-direction: column;
+      border: 1px solid #4b5563;
+    }
+    .start-menu button {
+      background: none;
+      color: white;
+      padding: 10px;
+      text-align: left;
+      border: none;
+      width: 100%;
+    }
+    .start-menu button:hover {
+      background-color: #4b5563;
+    }
+  </style>
+</head>
+<body>
+  <!-- Masaüstü ikonları -->
+  <div class="absolute top-4 left-4 flex flex-col gap-4">
+    <div class="icon w-20 h-20 flex flex-col items-center justify-center cursor-pointer" onclick="openWindow('chrome')">
+      <img src="https://cdn-icons-png.flaticon.com/512/888/888853.png" class="w-10 h-10"/>
+      <span class="text-xs text-center">Chrome</span>
+    </div>
+    <div class="icon w-20 h-20 flex flex-col items-center justify-center cursor-pointer" onclick="openWindow('notepad')">
+      <img src="https://cdn-icons-png.flaticon.com/512/2991/2991100.png" class="w-10 h-10"/>
+      <span class="text-xs text-center">Not Defteri</span>
+    </div>
+  </div>  <!-- Chrome Penceresi -->  <div id="chrome" class="window rounded shadow-lg">
+    <div class="window-header">
+      <span>Google Chrome</span>
+      <button onclick="closeWindow('chrome')">✖</button>
+    </div>
+    <iframe src="https://www.google.com" class="flex-1 w-full"></iframe>
+  </div>  <!-- Not Defteri Penceresi -->  <div id="notepad" class="window rounded shadow-lg">
+    <div class="window-header">
+      <span>Not Defteri</span>
+      <button onclick="closeWindow('notepad')">✖</button>
+    </div>
+    <textarea class="flex-1 w-full p-4 text-black resize-none"></textarea>
+  </div>  <!-- Başlat Menüsü -->  <div id="startMenu" class="start-menu">
+    <button onclick="openWindow('chrome')">🌐 Chrome</button>
+    <button onclick="openWindow('notepad')">📝 Not Defteri</button>
+  </div>  <!-- Görev Çubuğu -->  <div class="taskbar">
+    <div class="flex items-center gap-2">
+      <button onclick="toggleStartMenu()" class="bg-blue-600 px-3 py-1 rounded hover:bg-blue-700">Başlat</button>
+    </div>
+    <div id="clock"></div>
+  </div>  <script>
+    function openWindow(id) {
+      document.getElementById("startMenu").style.display = "none";
+      document.getElementById(id).style.display = "flex";
+    }
+    function closeWindow(id) {
+      document.getElementById(id).style.display = "none";
+    }
+    function toggleStartMenu() {
+      const menu = document.getElementById("startMenu");
+      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
+    setInterval(() => {
+      const now = new Date();
+      const time = now.toLocaleTimeString("tr-TR", {hour: '2-digit', minute:'2-digit'});
+      document.getElementById("clock").textContent = time;
+    }, 1000);
+  </script></body>
 </html>
