@@ -12,19 +12,19 @@
       background-size: cover;
       font-family: sans-serif;
       overflow: hidden;
-      cursor: none; /* Kendi mouse'u gösterilecek */
+      cursor: none;
     }
     .icon:hover {
       background-color: rgba(255, 255, 255, 0.2);
     }
     .window {
-      width: 600px;
-      height: 400px;
+      width: 800px;
+      height: 500px;
       background-color: #1f2937;
       border: 2px solid #4b5563;
       position: absolute;
-      top: 100px;
-      left: 100px;
+      top: 80px;
+      left: 80px;
       display: none;
       flex-direction: column;
       box-shadow: 0 0 20px rgba(0,0,0,0.6);
@@ -87,17 +87,20 @@
       background-size: contain;
       pointer-events: none;
     }
+    iframe {
+      border: none;
+    }
   </style>
 </head>
 <body>
   <div id="custom-cursor"></div>  <!-- Masaüstü ikonları -->  <div class="absolute top-4 left-4 flex flex-col gap-4">
     <div class="icon w-20 h-20 flex flex-col items-center justify-center cursor-pointer" onclick="openWindow('chrome')">
       <img src="https://cdn-icons-png.flaticon.com/512/888/888853.png" class="w-10 h-10"/>
-      <span class="text-xs text-center">Chrome</span>
+      <span class="text-xs text-center text-white">Chrome</span>
     </div>
     <div class="icon w-20 h-20 flex flex-col items-center justify-center cursor-pointer" onclick="openWindow('notepad')">
       <img src="https://cdn-icons-png.flaticon.com/512/2991/2991100.png" class="w-10 h-10"/>
-      <span class="text-xs text-center">Not Defteri</span>
+      <span class="text-xs text-center text-white">Not Defteri</span>
     </div>
   </div>  <!-- Chrome Penceresi -->  <div id="chrome" class="window">
     <div class="window-header">
@@ -110,13 +113,13 @@
       <span>Not Defteri</span>
       <button onclick="closeWindow('notepad')">✖</button>
     </div>
-    <textarea class="flex-1 w-full p-4 text-black resize-none"></textarea>
+    <textarea class="flex-1 w-full p-4 text-black resize-none" placeholder="Buraya yaz..."></textarea>
   </div>  <!-- Başlat Menüsü -->  <div id="startMenu" class="start-menu">
     <button onclick="openWindow('chrome')">🌐 Chrome</button>
     <button onclick="openWindow('notepad')">📝 Not Defteri</button>
   </div>  <!-- Görev Çubuğu -->  <div class="taskbar">
     <div class="flex items-center gap-2">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/4/48/Windows_logo_-_2021.svg" class="w-6 h-6" onclick="toggleStartMenu()"/>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/4/48/Windows_logo_-_2021.svg" class="w-6 h-6 cursor-pointer" onclick="toggleStartMenu()"/>
     </div>
     <div id="clock"></div>
   </div>  <script>
