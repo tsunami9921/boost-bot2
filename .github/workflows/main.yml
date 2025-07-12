@@ -1,0 +1,55 @@
+name: Tsubasa RDP by TsurenStudios
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+    - name: Setup XFCE Desktop & VNC
+      run: |
+        sudo apt update -y
+        sudo apt install xfce4 xfce4-goodies tightvncserver expect wget unzip language-pack-en -y
+        sudo useradd -m Tsubasa
+        echo 'Tsubasa:tsubasa0235' | sudo chpasswd
+        sudo usermod -aG sudo Tsubasa
+        echo 'LANG=en_US.UTF-8' | sudo tee -a /etc/default/locale
+        sudo locale-gen en_US.UTF-8
+        sudo update-locale LANG=en_US.UTF-8
+
+    - name: Install Ngrok
+      run: |
+        wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+        unzip ngrok-stable-linux-amd64.zip
+        chmod +x ngrok
+        ./ngrok authtoken ${{ secrets.NGROK_TOKEN }}
+
+    - name: Configure VNC Server
+      run: |
+        sudo -u Tsubasa vncserver
+        sudo -u Tsubasa vncserver -kill :1
+        mkdir -p /home/Tsubasa/.vnc
+        echo -e "#!/bin/bash\nexport LANG=en_US.UTF-8\nxrdb $HOME/.Xresources\nstartxfce4 &" > /home/Tsubasa/.vnc/xstartup
+        chmod +x /home/Tsubasa/.vnc/xstartup
+        echo "tsubasa0235" | vncpasswd -f > /home/Tsubasa/.vnc/passwd
+        chmod 600 /home/Tsubasa/.vnc/passwd
+        chown -R Tsubasa:Tsubasa /home/Tsubasa/.vnc
+        sudo -u Tsubasa vncserver
+
+    - name: Start Ngrok Tunnel
+      run: |
+        ./ngrok tcp 5901 > ngrok.log &
+        sleep 20
+        curl -s http://localhost:4040/api/tunnels > tunnels.json
+        cat tunnels.json
+
+    - name: 🔗 Connection Info
+      run: |
+        echo "::group::Connection Details"
+        cat tunnels.json
+        echo "Username: Tsubasa"
+        echo "Password: tsubasa0235"
+        echo "Desktop Environment: XFCE4 (English)"
+        echo "::endgroup::"
